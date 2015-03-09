@@ -1,0 +1,26 @@
+{
+  "name": "angular-selector",
+  "version": "0.2.7",
+  "description": "The general selector with infinite scroll",
+  "main": "dist/angular-selector.js",
+  "authors": [
+    "Ryan Chen <ryan.chen@turn.com>"
+  ],
+  "license": "private",
+  "private": true,
+  "dependencies": {
+    "angular": "1.2.23",
+    "unicorn": "ssh://git@stash.turn.com:7999/cnsl/unicorn.git#~0",
+    "turn-icon-font": "ssh://git@stash.turn.com:7999/cnsl/turn-icon-font.git",
+    "infinite-scroll-container": "ssh://git@stash.turn.com:7999/~rchen/turn-infinite-scroll.git",
+    "angular-spinner": "https://github.com/turn/angular-spinner.git"
+  },
+  "devDependencies": {
+    "angular-mocks": "~1.2.23"
+  },
+  "ignore": [
+    "test",
+    "Gruntfile.coffee",
+    "demo"
+  ]
+}

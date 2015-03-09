@@ -1,0 +1,14 @@
+<div class="rc-angular-selector rc-clearfix">
+
+    <span class="rc-angular-selector-label rc-selector-result rc-pull-left" 
+        ng-hide="isSelecting || isHovering || selections.length == 0" 
+        ng-mouseover="isHovering = true">
+        {{ selections || [] | rcAngularSelectorSelectedItemsFilter : '__text' }}</span>
+
+    <rc-angular-selector-input 
+        class="rc-angular-selector-input-wrapper rc-pull-left"
+        ng-class="{ 'has-selection': selections.length > 0, 'is-multiple': multiple }"
+        ng-show="isSelecting || isHovering || selections.length == 0" 
+        ng-mouseleave="isHovering = false"></rc-angular-selector-input>
+
+</div>
