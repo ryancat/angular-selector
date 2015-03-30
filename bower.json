@@ -1,6 +1,6 @@
 {
   "name": "angular-selector",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "The general selector with infinite scroll",
   "main": "dist/angular-selector.js",
   "authors": [
