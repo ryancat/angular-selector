@@ -95,25 +95,16 @@ angular.module("angular-selector.html", []).run(["$templateCache", function($tem
     "	</symbol>\n" +
     "	</defs>\n" +
     "	</svg>\n" +
-    "<!--\n" +
+    "\n" +
     "    <span class=\"rc-angular-selector-label rc-selector-result rc-pull-left\"\n" +
     "        ng-hide=\"isSelecting || isHovering || selections.length == 0\"\n" +
-    "        ng-mouseover=\"isHovering = true\">\n" +
-    "        {{ selections || [] | rcAngularSelectorSelectedItemsFilter : '__text' }}</span> -->\n" +
-    "\n" +
-    "    <!-- <rc-angular-selector-input\n" +
-    "        class=\"rc-angular-selector-input-wrapper rc-pull-left\"\n" +
-    "        ng-class=\"{ 'has-selection': selections.length > 0, 'is-multiple': multiple }\"\n" +
-    "        ng-show=\"isSelecting || isHovering || selections.length == 0\"\n" +
-    "        ng-mouseleave=\"isHovering = false\"></rc-angular-selector-input> -->\n" +
-    "\n" +
-    "    <span class=\"rc-angular-selector-label rc-selector-result rc-pull-left\"\n" +
     "        ng-mouseover=\"isHovering = true\">\n" +
     "        {{ selections || [] | rcAngularSelectorSelectedItemsFilter : '__text' }}</span>\n" +
     "\n" +
     "    <rc-angular-selector-input\n" +
     "        class=\"rc-angular-selector-input-wrapper rc-pull-left\"\n" +
     "        ng-class=\"{ 'has-selection': selections.length > 0, 'is-multiple': multiple }\"\n" +
+    "        ng-show=\"isSelecting || isHovering || selections.length == 0\"\n" +
     "        ng-mouseleave=\"isHovering = false\"></rc-angular-selector-input>\n" +
     "\n" +
     "</div>\n" +
