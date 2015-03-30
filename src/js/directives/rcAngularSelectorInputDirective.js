@@ -10,6 +10,7 @@ var _ = require('lodash');
 module.exports = /* @ngInject */ function (
     $log,
     $http,
+    $q,
     $timeout,
     rcAngularSelectorAjaxService,
     rcAngularSelectorKeyboardEnum,
@@ -30,7 +31,7 @@ module.exports = /* @ngInject */ function (
                  */
                 searchResults: [],
                 /**
-                 * The bad search results that not passing 
+                 * The bad search results that not passing
                  * #validateSearchResult function
                  */
                 badSearchResults: [],
@@ -51,6 +52,10 @@ module.exports = /* @ngInject */ function (
                  * Index of selections
                  */
                 horizontalIndex: -1,
+                /**
+                 * Search params updated and used based on the one given by user
+                 */
+                updatedSearchParams: angular.copy(scope.searchParams()) || {},
 
                 selectResult: function (searchResult) {
 
@@ -85,18 +90,29 @@ module.exports = /* @ngInject */ function (
                 /**
                  * The main fetch function
                  * use the searchUrl provided to fetch data with given params
+                 * if there is no searchUrl defined, then try to fetch results
+                 * from given options
                  */
                 fetch: function () {
 
+                	var deferred = $q.defer();
                     // Turn the spinner on
                     usSpinnerService.spin(scope.usSpinnerKey);
 
-                    return rcAngularSelectorAjaxService.getSearchResult(
-                        scope.searchUrl(),
-                        // We need to copy the search params as the cache is using reference
-                        // to the search params object
-                        angular.copy(scope.searchParams)
-                    ).then(scope.fetchSucceed, scope.fetchFailure)
+                    // If there is no search url defined
+                    // use options given by user
+                    if (!scope.searchUrl()) {
+                    	deferred.resolve([]);
+                    } else {
+                    	deferred.resolve(rcAngularSelectorAjaxService.getSearchResult(
+	                        scope.searchUrl(),
+	                        // We need to copy the search params as the cache is using reference
+	                        // to the search params object
+	                        scope.updatedSearchParams
+	                    ));
+                    }
+
+                    return deferred.promise.then(scope.fetchSucceed, scope.fetchFailure)
                     .finally(function () {
 
                         // Turn the spinner off
@@ -108,8 +124,18 @@ module.exports = /* @ngInject */ function (
 
                 fetchSucceed: function (response) {
 
-                    var params = response.config.params,
+                    var params, results;
+
+                    if (!scope.searchUrl()) {
+                    	params = {
+                    		offset: 0,
+                    		limit: response.length + 1
+                    	}
+                    	results = response;
+                    } else {
+                    	params = response.config.params;
                         results = response.data;
+                    }
 
                     // Get the correct list of data through given resultKeys array
                     (scope.resultKeys() || []).forEach(function (resultKey) {
@@ -127,7 +153,7 @@ module.exports = /* @ngInject */ function (
                             // Need to map the id and text to customized field
                             results = results.map(function (result) {
 
-                                // TODO: We are assuming there is no such id and text used 
+                                // TODO: We are assuming there is no such id and text used
                                 // __id and __text
                                 return angular.extend(result, {
                                     __id: result[resultKey.id],
@@ -157,6 +183,9 @@ module.exports = /* @ngInject */ function (
                     $log.error('Fetch failure due to:' + (reason || 'Unknown reason'));
 
                 },
+
+
+
                 /**
                  * Replace the search results to given results, and
                  * update the offset
@@ -177,7 +206,7 @@ module.exports = /* @ngInject */ function (
 
                     scope.searchResults = scope.searchResults.concat(results);
                     scope.updateSearchParams({
-                        offset: scope.searchParams.offset + results.length
+                        offset: scope.updatedSearchParams.offset + results.length
                     });
 
                 },
@@ -275,7 +304,7 @@ module.exports = /* @ngInject */ function (
                 },
 
                 handleKeydownResponse: function (e) {
-                    
+
                     switch (e.keyCode) {
 
                         case rcAngularSelectorKeyboardEnum.DOWN_ARROW:
@@ -329,7 +358,7 @@ module.exports = /* @ngInject */ function (
 
                     // TODO: Get the height of each 'li' element
                     // Move the search result panel up or down when necessary
-                    
+
                 },
                 /**
                  * Reset the input box
@@ -339,17 +368,16 @@ module.exports = /* @ngInject */ function (
                 },
                 /**
                  * Reset the search params to default (from user)
-                 * @param  {Boolean} isDeepReset flag to reset everything or just 
+                 * @param  {Boolean} isDeepReset flag to reset everything or just
                  *                               offset and search string
                  */
                 resetSearchParams: function (isDeepReset) {
 
                     if (isDeepReset) {
-                        scope.updateSearchParams(scope.defaultSearchParams);
+                        scope.updateSearchParams(scope.searchParams());
                     } else {
                         scope.updateSearchParams({
-                            offset: scope.defaultSearchParams.offset,
-                            searchString: scope.defaultSearchParams.searchString
+                            offset: scope.searchParams().offset
                         });
                     }
 
@@ -358,7 +386,7 @@ module.exports = /* @ngInject */ function (
                  * Reset the offset in search params to 0
                  */
                 resetOffset: function () {
-                    scope.searchParams.offset = 0;
+                    scope.updatedSearchParams.offset = 0;
                 },
                 /**
                  * Reset the has more flag to true (default)
@@ -367,7 +395,7 @@ module.exports = /* @ngInject */ function (
                     scope.hasMore = true;
                 },
                 /**
-                 * Update the search params 
+                 * Update the search params
                  */
                 updateSearchParams: function (searchParams) {
 
@@ -376,7 +404,7 @@ module.exports = /* @ngInject */ function (
                         return ;
                     }
 
-                    angular.extend(scope.searchParams, searchParams);
+                    angular.extend(scope.updatedSearchParams, searchParams);
                 },
                 /**
                  * Validate the search result
@@ -384,7 +412,7 @@ module.exports = /* @ngInject */ function (
                  */
                 validateSearchResult: function (searchResult) {
 
-                    var validated = angular.isDefined(searchResult.__id) && 
+                    var validated = angular.isDefined(searchResult.__id) &&
                         angular.isDefined(searchResult.__text);
 
                     if (!validated) {
@@ -413,7 +441,7 @@ module.exports = /* @ngInject */ function (
             // Watch on the selections array count
             scope.$watch('selections.length', function (length) {
 
-                // Update the horizontalIndex to be the latest 
+                // Update the horizontalIndex to be the latest
                 // index of selection
                 scope.horizontalIndex = length - 1;
 

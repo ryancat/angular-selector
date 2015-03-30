@@ -3,9 +3,9 @@
  * Colors
  */
 $rcAngularSelectorLabelColor: #9EA6AE;
-$rcAngularSelectorInputBackgroundColor: #404549;
-$rcAngularSelectorSelectionLabelColor: #D6D6D7;
-$rcAngularSelectorSelectionLabelBackgroundColor: #4E5356;
+$rcAngularSelectorSelectionLabelColor: #FFF;
+$rcAngularSelectorSelectionLabelFadeColor: #E6E6E6;
+$rcAngularSelectorSelectionLabelBackgroundColor: #888;
 $rcAngularSelectorDropdownHighlightColor: #37A0CE;
 
 /**
@@ -43,15 +43,25 @@ $rcBorderRadiusDefault: 4px;
     float: right;
 }
 
+// Icon fonts
+.rc-icon {
+	display: inline-block;
+}
+
+.rc-icon-cancel-circle {
+	width: 0.8em;
+	height: 0.8em;
+}
+
 /**
  * The labels when in normal mode (not editing)
  */
 .rc-angular-selector-label {
 
-    color: $rcAngularSelectorLabelColor;
+    // color: $rcAngularSelectorLabelColor;
     font-size: 13px;
-    height: 29px;
-    line-height: 29px;
+    height: 31px;
+    line-height: 31px;
 
     &.selector-type {
         display: block;
@@ -71,7 +81,7 @@ $rcBorderRadiusDefault: 4px;
  */
 .rc-angular-selector-input-wrapper {
 
-    max-width: 300px;
+    max-width: 600px;
 
     &:not(.has-selection) {
         width: 170px;
@@ -159,6 +169,18 @@ $rcBorderRadiusDefault: 4px;
         cursor: pointer;
         font-size: 14px;
         margin-left: 5px;
+
+        .rc-icon-cancel-circle {
+			color: $rcAngularSelectorSelectionLabelFadeColor;
+			fill: currentColor;
+		}
+
+        &:hover {
+        	.rc-icon-cancel-circle {
+        		color: $rcAngularSelectorSelectionLabelColor;
+				fill: currentColor;
+        	}
+        }
     }
 
     .rc-angular-selector-search-field {
@@ -170,7 +192,6 @@ $rcBorderRadiusDefault: 4px;
         background: 0 0;
         border: 0 none;
         box-shadow: none;
-        color: $rcAngularSelectorSelectionLabelColor;
         outline: 0;
         padding: 0;
         margin: 0;
@@ -201,7 +222,7 @@ $rcBorderRadiusDefault: 4px;
     position: relative;
     width: 100%;
     height: 200px;
-    overflow-y: auto; 
+    overflow-y: auto;
     border-radius: $rcBorderRadiusDefault;
 
     .rc-angular-selector-search-results-menu {

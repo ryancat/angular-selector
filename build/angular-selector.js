@@ -16,31 +16,35 @@ angular.module("angular-selector-input.html", []).run(["$templateCache", functio
     "            ng-class=\"{ 'is-multiple': multiple(), 'has-selection': selections.length > 0 }\"\n" +
     "            ng-repeat=\"selection in selections track by $index\">\n" +
     "            <span class=\"rc-pull-left\">{{ selection.__text }}</span>\n" +
-    "            <span class=\"rc-remove-icon rc-pull-right\" \n" +
-    "                ng-click=\"removeSelection(selection)\">x</span>\n" +
+    "            <!-- <span class=\"rc-remove-icon rc-pull-right icon-cancel-circle\"\n" +
+    "            ng-click=\"removeSelection(selection)\"></span> -->\n" +
+    "            <span class=\"rc-remove-icon rc-pull-right\"\n" +
+    "            	ng-click=\"removeSelection(selection)\">\n" +
+    "            	<svg class=\"rc-icon rc-icon-cancel-circle\"><use xlink:href=\"#icon-cancel-circle\"></use></svg>\n" +
+    "            </span>\n" +
     "        </li>\n" +
     "\n" +
     "        <li class=\"rc-angular-selector-search-field rc-pull-left\"\n" +
     "            ng-hide=\"selections.length > 0 && !multiple()\">\n" +
-    "            <input type=\"text\" \n" +
-    "                ng-model=\"searchParams.searchString\"\n" +
+    "            <input type=\"text\"\n" +
+    "                ng-model=\"updatedSearchParams.searchString\"\n" +
     "                ng-focus=\"handleInputBoxFocus()\"\n" +
     "                ng-blur=\"handleInputBoxBlur()\"\n" +
     "                ng-keydown=\"handleKeydownResponse($event)\"></input>\n" +
     "\n" +
-    "            <span \n" +
+    "            <span\n" +
     "                us-spinner=\"usSpinnerOpts\"\n" +
     "                spinner-key=\"usSpinnerKey\"></span>\n" +
     "        </li>\n" +
     "\n" +
     "    </ul>\n" +
-    "    \n" +
+    "\n" +
     "    <!-- The search result panel -->\n" +
     "    <div class=\"rc-angular-selector-search-results-wrapper\">\n" +
     "        <div ng-show=\"isSelecting\"\n" +
     "            class=\"rc-angular-selector-search-results\">\n" +
     "\n" +
-    "            <div infinite-scroll=\"fetch()\"\n" +
+    "            <!-- <div infinite-scroll=\"fetch()\"\n" +
     "                infinite-scroll-active=\"isSelecting && hasMore\"\n" +
     "                infinite-scroll-is-local=\"true\"\n" +
     "                class=\"rc-angular-selector-search-results-menu\">\n" +
@@ -56,28 +60,65 @@ angular.module("angular-selector-input.html", []).run(["$templateCache", functio
     "\n" +
     "                    </li>\n" +
     "                </ul>\n" +
-    "            </div>\n" +
+    "            </div> -->\n" +
+    "\n" +
+    "\n" +
+    "            <ul class=\"rc-angular-selector-search-results-menu\">\n" +
+    "                <li ng-repeat=\"searchResult in searchResults track by $index\"\n" +
+    "                    class=\"rc-angular-selector-search-result\"\n" +
+    "                    ng-class=\"{ 'is-highlighted': $index == verticalIndex, 'is-end-prefix': $index == prefixSearchResults().length - 1 }\"\n" +
+    "                    ng-mouseover=\"handleMouseoverOnSearchResults($index)\"\n" +
+    "                    ng-mousedown=\"selectResult(searchResult)\"\n" +
+    "                    ng-show=\"validateSearchResult(searchResult)\">\n" +
+    "\n" +
+    "                    <span>{{ searchResult.__text }}</span>\n" +
+    "\n" +
+    "                </li>\n" +
+    "            </ul>\n" +
+    "\n" +
     "        </div>\n" +
     "    </div>\n" +
-    "</div>");
+    "</div>\n" +
+    "");
 }]);
 
 angular.module("angular-selector.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("angular-selector.html",
     "<div class=\"rc-angular-selector rc-clearfix\">\n" +
     "\n" +
-    "    <span class=\"rc-angular-selector-label rc-selector-result rc-pull-left\" \n" +
-    "        ng-hide=\"isSelecting || isHovering || selections.length == 0\" \n" +
+    "	<!-- The svg defs used by the delete icon -->\n" +
+    "	<svg display=\"none\" width=\"0\" height=\"0\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n" +
+    "	<defs>\n" +
+    "	<symbol id=\"icon-cancel-circle\" viewBox=\"0 0 1024 1024\">\n" +
+    "		<title>cancel-circle</title>\n" +
+    "		<path class=\"path1\" d=\"M512 0c-282.77 0-512 229.23-512 512s229.23 512 512 512 512-229.23 512-512-229.23-512-512-512zM512 928c-229.75 0-416-186.25-416-416s186.25-416 416-416 416 186.25 416 416-186.25 416-416 416z\"></path>\n" +
+    "		<path class=\"path2\" d=\"M672 256l-160 160-160-160-96 96 160 160-160 160 96 96 160-160 160 160 96-96-160-160 160-160z\"></path>\n" +
+    "	</symbol>\n" +
+    "	</defs>\n" +
+    "	</svg>\n" +
+    "<!--\n" +
+    "    <span class=\"rc-angular-selector-label rc-selector-result rc-pull-left\"\n" +
+    "        ng-hide=\"isSelecting || isHovering || selections.length == 0\"\n" +
+    "        ng-mouseover=\"isHovering = true\">\n" +
+    "        {{ selections || [] | rcAngularSelectorSelectedItemsFilter : '__text' }}</span> -->\n" +
+    "\n" +
+    "    <!-- <rc-angular-selector-input\n" +
+    "        class=\"rc-angular-selector-input-wrapper rc-pull-left\"\n" +
+    "        ng-class=\"{ 'has-selection': selections.length > 0, 'is-multiple': multiple }\"\n" +
+    "        ng-show=\"isSelecting || isHovering || selections.length == 0\"\n" +
+    "        ng-mouseleave=\"isHovering = false\"></rc-angular-selector-input> -->\n" +
+    "\n" +
+    "    <span class=\"rc-angular-selector-label rc-selector-result rc-pull-left\"\n" +
     "        ng-mouseover=\"isHovering = true\">\n" +
     "        {{ selections || [] | rcAngularSelectorSelectedItemsFilter : '__text' }}</span>\n" +
     "\n" +
-    "    <rc-angular-selector-input \n" +
+    "    <rc-angular-selector-input\n" +
     "        class=\"rc-angular-selector-input-wrapper rc-pull-left\"\n" +
     "        ng-class=\"{ 'has-selection': selections.length > 0, 'is-multiple': multiple }\"\n" +
-    "        ng-show=\"isSelecting || isHovering || selections.length == 0\" \n" +
     "        ng-mouseleave=\"isHovering = false\"></rc-angular-selector-input>\n" +
     "\n" +
-    "</div>");
+    "</div>\n" +
+    "");
 }]);
 
 },{}],2:[function(require,module,exports){
@@ -6886,14 +6927,14 @@ module.exports = angular
 ])
 
 // Constants
-.constant('rcAngularSelectorKeyboardEnum', require('./js/rcKeyBoardEnum'))
-.constant('rcAngularSelectorConfig', require('./js/rcAngularSelectorConfig'))
+.constant('rcAngularSelectorKeyboardEnum', require('./js/constants/rcKeyBoardEnum'))
+.constant('rcAngularSelectorConfig', require('./js/constants/rcAngularSelectorConfig'))
 
 // Filters
-.filter('rcAngularSelectorSelectedItemsFilter', require('./js/rcAngularSelectorSelectedItemsFilter'))
+.filter('rcAngularSelectorSelectedItemsFilter', require('./js/filters/rcAngularSelectorSelectedItemsFilter'))
 
 // Factories
-.factory('RcAngularSelectorDataFactory', require('./js/RcAngularSelectorDataFactory'))
+.factory('RcAngularSelectorDataFactory', require('./js/factories/RcAngularSelectorDataFactory'))
 
 // Services
 .service('rcAngularSelectorAjaxService', require('./js/rcAngularSelectorAjaxService'))
@@ -6901,7 +6942,7 @@ module.exports = angular
 /**
  * The main entry of turn selector
  * @example
- * 
+ *
  * <div angular-selector
  *        search-url="searchUrl"
  *        search-params="searchParams"
@@ -6911,7 +6952,7 @@ module.exports = angular
  *
  * @author rchen@turn.com
  */
-.directive('rcAngularSelector', require('./js/rcAngularSelectorDirective'))
+.directive('rcAngularSelector', require('./js/directives/rcAngularSelectorDirective'))
 
 /**
  * The selector input
@@ -6920,9 +6961,760 @@ module.exports = angular
  *
  * @author rchen@turn.com
  */
-.directive('rcAngularSelectorInput', require('./js/rcAngularSelectorInputDirective'))
+.directive('rcAngularSelectorInput', require('./js/directives/rcAngularSelectorInputDirective'))
 ;
-},{"../build/template-build":1,"./js/RcAngularSelectorDataFactory":4,"./js/rcAngularSelectorAjaxService":5,"./js/rcAngularSelectorConfig":6,"./js/rcAngularSelectorDirective":7,"./js/rcAngularSelectorInputDirective":8,"./js/rcAngularSelectorSelectedItemsFilter":9,"./js/rcKeyBoardEnum":10}],4:[function(require,module,exports){
+
+},{"../build/template-build":1,"./js/constants/rcAngularSelectorConfig":4,"./js/constants/rcKeyBoardEnum":5,"./js/directives/rcAngularSelectorDirective":6,"./js/directives/rcAngularSelectorInputDirective":7,"./js/factories/RcAngularSelectorDataFactory":8,"./js/filters/rcAngularSelectorSelectedItemsFilter":9,"./js/rcAngularSelectorAjaxService":10}],4:[function(require,module,exports){
+/**
+ * @fileOverview The configuration for turn selector
+ *
+ * @author rchen
+ */
+
+// @ngInject
+
+module.exports = Object.freeze({
+
+    // SEARCH_RESULT_KEYBOARD_MOVE_LIMIT: 3
+    SEARCH_RESULT_LIMIT: 20
+
+});
+
+},{}],5:[function(require,module,exports){
+/**
+ * @fileOverview The keyboard code enum
+ * @see https://gist.github.com/cjcliffe/1185173
+ * 
+ * @author rchen
+ */
+
+// @ngInject
+
+module.exports = Object.freeze({
+    BACKSPACE: 8,
+    TAB: 9,
+    ENTER: 13,
+    SHIFT: 16,
+    CTRL: 17,
+    ALT: 18,
+    PAUSE: 19,
+    CAPS_LOCK: 20,
+    ESCAPE: 27,
+    SPACE: 32,
+    PAGE_UP: 33,
+    PAGE_DOWN: 34,
+    END: 35,
+    HOME: 36,
+    LEFT_ARROW: 37,
+    UP_ARROW: 38,
+    RIGHT_ARROW: 39,
+    DOWN_ARROW: 40,
+    INSERT: 45,
+    DELETE: 46,
+    KEY_0: 48,
+    KEY_1: 49,
+    KEY_2: 50,
+    KEY_3: 51,
+    KEY_4: 52,
+    KEY_5: 53,
+    KEY_6: 54,
+    KEY_7: 55,
+    KEY_8: 56,
+    KEY_9: 57,
+    KEY_A: 65,
+    KEY_B: 66,
+    KEY_C: 67,
+    KEY_D: 68,
+    KEY_E: 69,
+    KEY_F: 70,
+    KEY_G: 71,
+    KEY_H: 72,
+    KEY_I: 73,
+    KEY_J: 74,
+    KEY_K: 75,
+    KEY_L: 76,
+    KEY_M: 77,
+    KEY_N: 78,
+    KEY_O: 79,
+    KEY_P: 80,
+    KEY_Q: 81,
+    KEY_R: 82,
+    KEY_S: 83,
+    KEY_T: 84,
+    KEY_U: 85,
+    KEY_V: 86,
+    KEY_W: 87,
+    KEY_X: 88,
+    KEY_Y: 89,
+    KEY_Z: 90,
+    LEFT_META: 91,
+    RIGHT_META: 92,
+    SELECT: 93,
+    NUMPAD_0: 96,
+    NUMPAD_1: 97,
+    NUMPAD_2: 98,
+    NUMPAD_3: 99,
+    NUMPAD_4: 100,
+    NUMPAD_5: 101,
+    NUMPAD_6: 102,
+    NUMPAD_7: 103,
+    NUMPAD_8: 104,
+    NUMPAD_9: 105,
+    MULTIPLY: 106,
+    ADD: 107,
+    SUBTRACT: 109,
+    DECIMAL: 110,
+    DIVIDE: 111,
+    F1: 112,
+    F2: 113,
+    F3: 114,
+    F4: 115,
+    F5: 116,
+    F6: 117,
+    F7: 118,
+    F8: 119,
+    F9: 120,
+    F10: 121,
+    F11: 122,
+    F12: 123,
+    NUM_LOCK: 144,
+    SCROLL_LOCK: 145,
+    SEMICOLON: 186,
+    EQUALS: 187,
+    COMMA: 188,
+    DASH: 189,
+    PERIOD: 190,
+    FORWARD_SLASH: 191,
+    GRAVE_ACCENT: 192,
+    OPEN_BRACKET: 219,
+    BACK_SLASH: 220,
+    CLOSE_BRACKET: 221,
+    SINGLE_QUOTE: 222
+});
+},{}],6:[function(require,module,exports){
+/**
+ * @fileOverview The angular-selector directive
+ *
+ * @author rchen
+ */
+
+var _ = require('lodash');
+
+// @ngInject
+module.exports = /* @ngInject */ ["$log", "$document", "$timeout", "RcAngularSelectorDataFactory", "rcAngularSelectorConfig", function (
+	$log,
+	$document,
+	$timeout,
+	RcAngularSelectorDataFactory,
+	rcAngularSelectorConfig) {
+
+    return {
+        restrict: 'E',
+        scope: {
+
+            selections: '=',
+            searchUrl: '&',
+            searchParams: '&',
+            isDisabled: '&',
+            resultKeys: '&',
+            multiple: '&',
+            prefixSearchResults: '&',
+            usSpinnerOptions: '&',
+            defaultSelections: '&'
+
+        },
+        templateUrl: 'angular-selector.html',
+        link: {
+        	pre: function (scope) {
+
+        		// Make sure we have some default search
+        		// params. This is for both static and
+        		// ajax way of fetching search result
+        		scope.searchParams = scope.searchParams() ?
+        			scope.searchParams :
+        			function () {
+	        			return {
+	        				offset: 0,
+	        				limit: rcAngularSelectorConfig.SEARCH_RESULT_LIMIT
+	        			}
+        			};
+
+        	},
+
+        	post: function (scope, element) {
+        		// Validate the attributes
+	            if (!angular.isArray(scope.selections)) {
+	                $log.error('Invalid selections attribute');
+	                return ;
+	            }
+
+	            if (!angular.isArray(scope.resultKeys())) {
+	                scope.resultKeys = function () {
+	                    return [{
+	                        id: 'id',
+	                        text: 'text'
+	                    }];
+	                };
+	            }
+
+	            angular.extend(scope, {
+
+	                // We need to create a new selections for each selector in the
+	                // same web app
+	                selectionsObj: new RcAngularSelectorDataFactory(scope.selections),
+	                /**
+	                 * Selecting status flag
+	                 * This flag is true whenever input box is fucused
+	                 */
+	                isSelecting: false,
+	                /**
+	                 * Use current scope's id (unique) for the only spinner in
+	                 * selector
+	                 */
+	                usSpinnerKey: scope.$id,
+	                /**
+	                 * Customize the spinner style
+	                 */
+	                usSpinnerOpts: scope.usSpinnerOptions() || {
+
+	                    length: 3, // The length of each line
+	                    width: 2, // The line thickness
+	                    radius: 3, // The radius of the inner circle
+	                    top: '50%', // Top position relative to parent
+	                    left: '90%' // Left position relative to parent
+
+	                },
+
+	                init: function () {
+
+	                    var defaultSelections = scope.defaultSelections();
+
+	                    // Get reference to selections
+	                    // Do not use scope.selections directly. Always use
+	                    // api given from selectionsObj.
+	                    scope.selections = scope.selectionsObj.getSelections();
+
+	                    // Set the default selection(s) if any
+	                    if (angular.isDefined(defaultSelections)) {
+	                        scope.loadDefaultSelections();
+	                    }
+
+	                },
+	                /**
+	                 * Extend __id and __text field for selections
+	                 */
+	                prepareSelection: function (selection) {
+
+	                    if (angular.isDefined(selection.__id) &&
+	                        angular.isDefined(selection.__text)) {
+	                        return ;
+	                    }
+
+	                    angular.extend(selection, {
+
+	                        __id: selection[_.last(scope.resultKeys()).id] || selection.id,
+	                        __text: selection[_.last(scope.resultKeys()).text] || selection.text,
+
+	                    });
+
+	                },
+	                /**
+	                 * Load the default selections
+	                 */
+	                loadDefaultSelections: function () {
+
+	                    var defaultSelections = scope.defaultSelections();
+
+	                    // Prepare the selection
+	                    _.flatten([defaultSelections]).forEach(scope.prepareSelection);
+	                    scope.selectionsObj.appendToSelections(defaultSelections);
+
+	                }
+	            });
+
+	            scope.init();
+
+	            scope.$watch('selections.length', function (length) {
+
+	                if (length === 0) {
+	                    return ;
+	                }
+
+	                // Make sure all selection has correct hidden fields to
+	                // their id and text
+	                scope.selections.forEach(scope.prepareSelection);
+
+	            });
+
+	            // teardown
+	            scope.$on('$destroy', function(){});
+        	}
+        }
+    };
+
+}];
+module.exports.$inject = ["$log", "$document", "$timeout", "RcAngularSelectorDataFactory", "rcAngularSelectorConfig"];
+
+},{"lodash":2}],7:[function(require,module,exports){
+/**
+ * @fileOverview The angular-selector-input directive
+ *
+ * @author rchen
+ */
+
+var _ = require('lodash');
+
+// @ngInject
+module.exports = /* @ngInject */ ["$log", "$http", "$q", "$timeout", "rcAngularSelectorAjaxService", "rcAngularSelectorKeyboardEnum", "rcAngularSelectorConfig", "usSpinnerService", function (
+    $log,
+    $http,
+    $q,
+    $timeout,
+    rcAngularSelectorAjaxService,
+    rcAngularSelectorKeyboardEnum,
+    rcAngularSelectorConfig,
+    usSpinnerService) {
+
+    return {
+        restrict: 'E',
+        templateUrl: 'angular-selector-input.html',
+        link: function (scope, element) {
+
+            var inputBox = element.find('input');
+
+            angular.extend(scope, {
+
+                /**
+                 * The search results from remote
+                 */
+                searchResults: [],
+                /**
+                 * The bad search results that not passing
+                 * #validateSearchResult function
+                 */
+                badSearchResults: [],
+                /**
+                 * True if the option is selected after last time
+                 * the input box got focused
+                 */
+                isSelected: false,
+                /**
+                 * True if there is more results to fetch
+                 */
+                hasMore: true,
+                /**
+                 * Index of which option in drop down menu should be highlighted
+                 */
+                verticalIndex: -1,
+                /**
+                 * Index of selections
+                 */
+                horizontalIndex: -1,
+                /**
+                 * Search params updated and used based on the one given by user
+                 */
+                updatedSearchParams: angular.copy(scope.searchParams()) || {},
+
+                selectResult: function (searchResult) {
+
+                    // Tell selections we have one more item
+                    scope.selectionsObj.appendToSelections(searchResult);
+                    // Clean the input box
+                    scope.resetInputBox();
+                    // Set the status to true after selecting
+                    scope.isSelected = true;
+                },
+                /**
+                 * Remove a selection from selections array
+                 */
+                removeSelection: function (selection) {
+
+                    var defaultSelections = scope.defaultSelections();
+
+                    // Remove the selection
+                    scope.selectionsObj.removeSelectionById(selection.__id);
+
+                    // If there are no selection after removal,
+                    // and if we have default selections,
+                    // we need to open the dropdown box and request
+                    // user to select any. Otherwise we will use default selections
+                    if (scope.selectionsObj.isEmpty() &&
+                        angular.isDefined(defaultSelections)) {
+
+                        // Make sure the input box is focused
+                        scope.focusInputBox();
+                    }
+                },
+                /**
+                 * The main fetch function
+                 * use the searchUrl provided to fetch data with given params
+                 * if there is no searchUrl defined, then try to fetch results
+                 * from given options
+                 */
+                fetch: function () {
+
+                	var deferred = $q.defer();
+                    // Turn the spinner on
+                    usSpinnerService.spin(scope.usSpinnerKey);
+
+                    // If there is no search url defined
+                    // use options given by user
+                    if (!scope.searchUrl()) {
+                    	deferred.resolve([]);
+                    } else {
+                    	deferred.resolve(rcAngularSelectorAjaxService.getSearchResult(
+	                        scope.searchUrl(),
+	                        // We need to copy the search params as the cache is using reference
+	                        // to the search params object
+	                        scope.updatedSearchParams
+	                    ));
+                    }
+
+                    return deferred.promise.then(scope.fetchSucceed, scope.fetchFailure)
+                    .finally(function () {
+
+                        // Turn the spinner off
+                        usSpinnerService.stop(scope.usSpinnerKey);
+
+                    });
+
+                },
+
+                fetchSucceed: function (response) {
+
+                    var params, results;
+
+                    if (!scope.searchUrl()) {
+                    	params = {
+                    		offset: 0,
+                    		limit: response.length + 1
+                    	}
+                    	results = response;
+                    } else {
+                    	params = response.config.params;
+                        results = response.data;
+                    }
+
+                    // Get the correct list of data through given resultKeys array
+                    (scope.resultKeys() || []).forEach(function (resultKey) {
+
+                         if (angular.isString(resultKey)) {
+                            results = results[resultKey];
+                        } else if (angular.isObject(resultKey)) {
+
+                            // Prepend the prefix search results
+                            if (params.offset === 0) {
+                                results = (scope.prefixSearchResults() || []).concat(results);
+                            }
+
+                            // The mapping step
+                            // Need to map the id and text to customized field
+                            results = results.map(function (result) {
+
+                                // TODO: We are assuming there is no such id and text used
+                                // __id and __text
+                                return angular.extend(result, {
+                                    __id: result[resultKey.id],
+                                    __text: result[resultKey.text]
+                                });
+
+                            });
+                        }
+
+                    });
+
+                    // Replace or attach to the searchResults array
+                    if (params.offset === 0) {
+                        // Update the current fetch status
+                        scope.hasMore = (results.length - (scope.prefixSearchResults() || []).length) === params.limit;
+                        scope.replace(results);
+                    } else {
+                        // Update the current fetch status
+                        scope.hasMore = results.length === params.limit;
+                        scope.append(results);
+                    }
+
+                },
+
+                fetchFailure: function (reason) {
+
+                    $log.error('Fetch failure due to:' + (reason || 'Unknown reason'));
+
+                },
+
+
+
+                /**
+                 * Replace the search results to given results, and
+                 * update the offset
+                 */
+                replace: function (results) {
+
+                    scope.searchResults = results;
+                    scope.updateSearchParams({
+                        offset: results.length - (scope.prefixSearchResults() || []).length
+                    });
+
+                },
+                /**
+                 * Append the results to search results, and
+                 * update the offset
+                 */
+                append: function (results) {
+
+                    scope.searchResults = scope.searchResults.concat(results);
+                    scope.updateSearchParams({
+                        offset: scope.updatedSearchParams.offset + results.length
+                    });
+
+                },
+
+                handleInputBoxFocus: function () {
+
+                    scope.isSelecting = true;
+                    scope.fetch();
+                },
+
+                handleInputBoxBlur: function () {
+
+                    var defaultSelections = scope.defaultSelections();
+
+                    // Clean the input box
+                    scope.resetInputBox();
+                    // Clean the search params
+                    scope.resetSearchParams();
+                    // Clean the search result menu
+                    scope.searchResults = [];
+                    // Reset has more
+                    scope.resetHasMore();
+
+                    // Different behavior for multiple and single mode
+                    if (scope.isSelected && scope.multiple()) {
+                        // Make sure the input box is focused
+                        // We need $timeout to bypass the blur
+                        scope.focusInputBox();
+                    } else {
+                        // If we have default and there is no selection
+                        // made. We need to use the default selections
+                        if (scope.selectionsObj.isEmpty() &&
+                            angular.isDefined(defaultSelections)) {
+                            scope.loadDefaultSelections();
+                        }
+
+                        scope.isSelecting = false;
+                    }
+
+                    // Turn the spinner off
+                    usSpinnerService.stop(scope.usSpinnerKey);
+                },
+
+                handleSearchStringChange: function () {
+
+                    // Reset the offset
+                    scope.updateSearchParams({
+                        offset: 0
+                    });
+
+                    scope.fetch();
+
+                },
+                /**
+                 * Focus the input box
+                 * Do nothing if you click on a existing selection tag
+                 * @param  {event} e click event to tell if we click on existing selection
+                 */
+                focusInputBox: function (e) {
+
+                    var target;
+
+                    if (e) {
+                        target = angular.element(e.target);
+
+                        if (target.hasClass('angular-selector-selection') ||
+                            target.parent().hasClass('angular-selector-selection')) {
+                            return ;
+                        }
+                    }
+
+                    // Typeahead the most used cached data
+                    if (scope.typeahead) {
+                        // TODO use cache to implement typeahead
+                    }
+
+                    $timeout(function () {
+                        inputBox[0].focus();
+                        // Set the isSelected status to false
+                        // prepare for the next selection
+                        scope.isSelected = false;
+                    });
+                },
+
+                blurInputBox: function () {
+
+                    $timeout(function () {
+                        inputBox[0].blur();
+                        // Set the isSelected status to false
+                        // prepare for the next selection
+                        scope.isSelected = false;
+                        scope.handleInputBoxBlur();
+                    });
+
+                },
+
+                handleKeydownResponse: function (e) {
+
+                    switch (e.keyCode) {
+
+                        case rcAngularSelectorKeyboardEnum.DOWN_ARROW:
+                            scope.verticalIndex += 1;
+                            scope.refreshDropdownMenu();
+                            break;
+
+                        case rcAngularSelectorKeyboardEnum.UP_ARROW:
+                            scope.verticalIndex -= 1;
+                            scope.refreshDropdownMenu();
+                            break;
+
+                        case rcAngularSelectorKeyboardEnum.LEFT_ARROW:
+                            scope.horizontalIndex -= 1;
+                            break;
+
+                        case rcAngularSelectorKeyboardEnum.RIGHT_ARROW:
+                            scope.horizontalIndex += 1;
+                            break;
+
+                        case rcAngularSelectorKeyboardEnum.ENTER:
+                            scope.selectResult(scope.searchResults[scope.verticalIndex]);
+                            scope.isSelected = false;
+                            break;
+
+                        case rcAngularSelectorKeyboardEnum.ESCAPE:
+                            scope.blurInputBox();
+                            break;
+                    }
+
+                },
+                /**
+                 * Reset the keyboard vertical index record
+                 */
+                resetVerticalIndex: function (indexToReset) {
+
+                    indexToReset = angular.isNumber(indexToReset) ? indexToReset : -1;
+                    scope.verticalIndex = indexToReset;
+                },
+
+                handleMouseoverOnSearchResults: function (searchResultIndex) {
+
+                    scope.resetVerticalIndex(searchResultIndex);
+
+                },
+                /**
+                 * Function called when you press down/up arrow key
+                 * This will adjust the dropdown scroll accordingly
+                 */
+                refreshDropdownMenu: function () {
+
+                    // TODO: Get the height of each 'li' element
+                    // Move the search result panel up or down when necessary
+
+                },
+                /**
+                 * Reset the input box
+                 */
+                resetInputBox: function () {
+                    inputBox.val('');
+                },
+                /**
+                 * Reset the search params to default (from user)
+                 * @param  {Boolean} isDeepReset flag to reset everything or just
+                 *                               offset and search string
+                 */
+                resetSearchParams: function (isDeepReset) {
+
+                    if (isDeepReset) {
+                        scope.updateSearchParams(scope.searchParams());
+                    } else {
+                        scope.updateSearchParams({
+                            offset: scope.searchParams().offset
+                        });
+                    }
+
+                },
+                /**
+                 * Reset the offset in search params to 0
+                 */
+                resetOffset: function () {
+                    scope.updatedSearchParams.offset = 0;
+                },
+                /**
+                 * Reset the has more flag to true (default)
+                 */
+                resetHasMore: function () {
+                    scope.hasMore = true;
+                },
+                /**
+                 * Update the search params
+                 */
+                updateSearchParams: function (searchParams) {
+
+                    if (!angular.isObject(searchParams)) {
+                        $log.warn('Invalid search params');
+                        return ;
+                    }
+
+                    angular.extend(scope.updatedSearchParams, searchParams);
+                },
+                /**
+                 * Validate the search result
+                 * A valid search result must have an ID and TEXT
+                 */
+                validateSearchResult: function (searchResult) {
+
+                    var validated = angular.isDefined(searchResult.__id) &&
+                        angular.isDefined(searchResult.__text);
+
+                    if (!validated) {
+                        scope.badSearchResults = scope.badSearchResults.concat(
+                            _.remove(scope.searchResults, searchResult));
+                    }
+
+                    return validated;
+
+                }
+
+            });
+
+            // Watcher on searchString updates
+            // Debounce the executing of callback function to reduce ajax calls
+            scope.$watch('searchParams.searchString', _.debounce(function (searchString) {
+
+                if (!angular.isDefined(searchString)) {
+                    return ;
+                }
+
+                scope.handleSearchStringChange();
+
+            }, 300));
+
+            // Watch on the selections array count
+            scope.$watch('selections.length', function (length) {
+
+                // Update the horizontalIndex to be the latest
+                // index of selection
+                scope.horizontalIndex = length - 1;
+
+            });
+
+            // teardown
+            scope.$on('$destroy', function(){});
+
+        }
+    };
+
+}];
+module.exports.$inject = ["$log", "$http", "$q", "$timeout", "rcAngularSelectorAjaxService", "rcAngularSelectorKeyboardEnum", "rcAngularSelectorConfig", "usSpinnerService"];
+
+},{"lodash":2}],8:[function(require,module,exports){
 /**
  * @fileOverview The data service for turn selector
  * This data service can be used outside of this module
@@ -7083,7 +7875,31 @@ module.exports = /* @ngInject */ function () {
 
     return Selections;
 };
-},{"lodash":2}],5:[function(require,module,exports){
+},{"lodash":2}],9:[function(require,module,exports){
+/**
+ * @fileOverview The selected item filter
+ * Return the selection name with a dividor
+ *
+ * @author rchen
+ */
+
+var _ = require('lodash');
+
+// @ngInject
+module.exports = /* @ngInject */ function () {
+
+    return function (selectedItems, keyToShow) {
+
+        if (!angular.isArray(selectedItems)) {
+            return selectedItems;
+        }
+
+        return _.pluck(selectedItems, keyToShow).join(', ');
+
+    };
+
+};
+},{"lodash":2}],10:[function(require,module,exports){
 /**
  * @fileOverview The ajax service for fetching data
  *
@@ -7115,731 +7931,4 @@ module.exports = /* @ngInject */ ["$q", "$http", function ($q, $http) {
 }];
 module.exports.$inject = ["$q", "$http"];
 
-},{}],6:[function(require,module,exports){
-/**
- * @fileOverview The configuration for turn selector
- *
- * @author rchen
- */
-
-// @ngInject
-
-module.exports = Object.freeze({
-
-    // SEARCH_RESULT_KEYBOARD_MOVE_LIMIT: 3
-
-});
-},{}],7:[function(require,module,exports){
-/**
- * @fileOverview The angular-selector directive
- *
- * @author rchen
- */
-
-var _ = require('lodash');
-
-// @ngInject
-module.exports = /* @ngInject */ ["$log", "$document", "$timeout", "RcAngularSelectorDataFactory", function ($log, $document, $timeout, RcAngularSelectorDataFactory) {
-
-    return {
-        restrict: 'E',
-        scope: {
-
-            selections: '=',
-            searchUrl: '&',
-            searchParams: '=',
-            isDisabled: '&',
-            resultKeys: '&',
-            multiple: '&',
-            session: '=',
-            prefixSearchResults: '&',
-            typeahead: '&',
-            tolerance: '&',
-            usSpinnerOptions: '&',
-            defaultSelections: '&'
-            
-        },
-        templateUrl: 'angular-selector.html',
-        link: function (scope, element) {
-
-            // Validate the attributes
-            if (!angular.isArray(scope.selections)) {
-                $log.error('Invalid selections attribute');
-                return ;
-            }      
-
-            if (!angular.isArray(scope.resultKeys())) {
-                scope.resultKeys = function () {
-                    return [{
-                        id: 'id',
-                        text: 'text'
-                    }];
-                };
-            }
-
-            angular.extend(scope, {
-
-                // We need to create a new selections for each selector in the 
-                // same web app
-                selectionsObj: new RcAngularSelectorDataFactory(scope.selections),
-                /**
-                 * Selecting status flag
-                 * This flag is true whenever input box is fucused
-                 */
-                isSelecting: false,
-
-                defaultSearchParams: angular.copy(scope.searchParams),
-                /**
-                 * Use current scope's id (unique) for the only spinner in 
-                 * selector
-                 */
-                usSpinnerKey: scope.$id,
-                /**
-                 * Customize the spinner style
-                 */
-                usSpinnerOpts: scope.usSpinnerOptions() || {
-
-                    length: 3, // The length of each line
-                    width: 2, // The line thickness
-                    radius: 3, // The radius of the inner circle
-                    color: '#FFF', // #rgb or #rrggbb or array of colors
-                    top: '50%', // Top position relative to parent
-                    left: '90%' // Left position relative to parent
-
-                },
-
-                init: function () {
-
-                    var defaultSelections = scope.defaultSelections();
-
-                    // Get reference to selections
-                    // Do not use scope.selections directly. Always use 
-                    // api given from selectionsObj.
-                    scope.selections = scope.selectionsObj.getSelections();
-
-                    // Set the default selection(s) if any
-                    if (angular.isDefined(defaultSelections)) {
-                        scope.loadDefaultSelections();
-                    } 
-
-                },
-                /**
-                 * Extend __id and __text field for selections
-                 */
-                prepareSelection: function (selection) {
-
-                    if (angular.isDefined(selection.__id) &&
-                        angular.isDefined(selection.__text)) {
-                        return ;
-                    }
-
-                    angular.extend(selection, {
-
-                        __id: selection[_.last(scope.resultKeys()).id] || selection.id,
-                        __text: selection[_.last(scope.resultKeys()).text] || selection.text,
-
-                    });
-
-                },
-                /**
-                 * Load the default selections
-                 */
-                loadDefaultSelections: function () {
-
-                    var defaultSelections = scope.defaultSelections();
-
-                    // Prepare the selection
-                    _.flatten([defaultSelections]).forEach(scope.prepareSelection);
-                    scope.selectionsObj.appendToSelections(defaultSelections);
-
-                }
-            });
-
-            scope.init();
-
-            scope.$watch('selections.length', function (length) {
-
-                if (length === 0) {
-                    return ;
-                }
-
-                // Make sure all selection has correct hidden fields to
-                // their id and text
-                scope.selections.forEach(scope.prepareSelection);
-
-            });
-
-            // teardown
-            scope.$on('$destroy', function(){});
-
-        }
-    };
-
-}];
-module.exports.$inject = ["$log", "$document", "$timeout", "RcAngularSelectorDataFactory"];
-},{"lodash":2}],8:[function(require,module,exports){
-/**
- * @fileOverview The angular-selector-input directive
- *
- * @author rchen
- */
-
-var _ = require('lodash');
-
-// @ngInject
-module.exports = /* @ngInject */ ["$log", "$http", "$timeout", "rcAngularSelectorAjaxService", "rcAngularSelectorKeyboardEnum", "rcAngularSelectorConfig", "usSpinnerService", function (
-    $log,
-    $http,
-    $timeout,
-    rcAngularSelectorAjaxService,
-    rcAngularSelectorKeyboardEnum,
-    rcAngularSelectorConfig,
-    usSpinnerService) {
-
-    return {
-        restrict: 'E',
-        templateUrl: 'angular-selector-input.html',
-        link: function (scope, element) {
-
-            var inputBox = element.find('input');
-
-            angular.extend(scope, {
-
-                /**
-                 * The search results from remote
-                 */
-                searchResults: [],
-                /**
-                 * The bad search results that not passing 
-                 * #validateSearchResult function
-                 */
-                badSearchResults: [],
-                /**
-                 * True if the option is selected after last time
-                 * the input box got focused
-                 */
-                isSelected: false,
-                /**
-                 * True if there is more results to fetch
-                 */
-                hasMore: true,
-                /**
-                 * Index of which option in drop down menu should be highlighted
-                 */
-                verticalIndex: -1,
-                /**
-                 * Index of selections
-                 */
-                horizontalIndex: -1,
-
-                selectResult: function (searchResult) {
-
-                    // Tell selections we have one more item
-                    scope.selectionsObj.appendToSelections(searchResult);
-                    // Clean the input box
-                    scope.resetInputBox();
-                    // Set the status to true after selecting
-                    scope.isSelected = true;
-                },
-                /**
-                 * Remove a selection from selections array
-                 */
-                removeSelection: function (selection) {
-
-                    var defaultSelections = scope.defaultSelections();
-
-                    // Remove the selection
-                    scope.selectionsObj.removeSelectionById(selection.__id);
-
-                    // If there are no selection after removal,
-                    // and if we have default selections,
-                    // we need to open the dropdown box and request
-                    // user to select any. Otherwise we will use default selections
-                    if (scope.selectionsObj.isEmpty() &&
-                        angular.isDefined(defaultSelections)) {
-
-                        // Make sure the input box is focused
-                        scope.focusInputBox();
-                    }
-                },
-                /**
-                 * The main fetch function
-                 * use the searchUrl provided to fetch data with given params
-                 */
-                fetch: function () {
-
-                    // Turn the spinner on
-                    usSpinnerService.spin(scope.usSpinnerKey);
-
-                    return rcAngularSelectorAjaxService.getSearchResult(
-                        scope.searchUrl(),
-                        // We need to copy the search params as the cache is using reference
-                        // to the search params object
-                        angular.copy(scope.searchParams)
-                    ).then(scope.fetchSucceed, scope.fetchFailure)
-                    .finally(function () {
-
-                        // Turn the spinner off
-                        usSpinnerService.stop(scope.usSpinnerKey);
-
-                    });
-
-                },
-
-                fetchSucceed: function (response) {
-
-                    var params = response.config.params,
-                        results = response.data;
-
-                    // Get the correct list of data through given resultKeys array
-                    (scope.resultKeys() || []).forEach(function (resultKey) {
-
-                         if (angular.isString(resultKey)) {
-                            results = results[resultKey];
-                        } else if (angular.isObject(resultKey)) {
-
-                            // Prepend the prefix search results
-                            if (params.offset === 0) {
-                                results = (scope.prefixSearchResults() || []).concat(results);
-                            }
-
-                            // The mapping step
-                            // Need to map the id and text to customized field
-                            results = results.map(function (result) {
-
-                                // TODO: We are assuming there is no such id and text used 
-                                // __id and __text
-                                return angular.extend(result, {
-                                    __id: result[resultKey.id],
-                                    __text: result[resultKey.text]
-                                });
-
-                            });
-                        }
-
-                    });
-
-                    // Replace or attach to the searchResults array
-                    if (params.offset === 0) {
-                        // Update the current fetch status
-                        scope.hasMore = (results.length - (scope.prefixSearchResults() || []).length) === params.limit;
-                        scope.replace(results);
-                    } else {
-                        // Update the current fetch status
-                        scope.hasMore = results.length === params.limit;
-                        scope.append(results);
-                    }
-
-                },
-
-                fetchFailure: function (reason) {
-
-                    $log.error('Fetch failure due to:' + (reason || 'Unknown reason'));
-
-                },
-                /**
-                 * Replace the search results to given results, and
-                 * update the offset
-                 */
-                replace: function (results) {
-
-                    scope.searchResults = results;
-                    scope.updateSearchParams({
-                        offset: results.length - (scope.prefixSearchResults() || []).length
-                    });
-
-                },
-                /**
-                 * Append the results to search results, and
-                 * update the offset
-                 */
-                append: function (results) {
-
-                    scope.searchResults = scope.searchResults.concat(results);
-                    scope.updateSearchParams({
-                        offset: scope.searchParams.offset + results.length
-                    });
-
-                },
-
-                handleInputBoxFocus: function () {
-
-                    scope.isSelecting = true;
-                    scope.fetch();
-                },
-
-                handleInputBoxBlur: function () {
-
-                    var defaultSelections = scope.defaultSelections();
-
-                    // Clean the input box
-                    scope.resetInputBox();
-                    // Clean the search params
-                    scope.resetSearchParams();
-                    // Clean the search result menu
-                    scope.searchResults = [];
-                    // Reset has more
-                    scope.resetHasMore();
-
-                    // Different behavior for multiple and single mode
-                    if (scope.isSelected && scope.multiple()) {
-                        // Make sure the input box is focused
-                        // We need $timeout to bypass the blur
-                        scope.focusInputBox();
-                    } else {
-                        // If we have default and there is no selection
-                        // made. We need to use the default selections
-                        if (scope.selectionsObj.isEmpty() &&
-                            angular.isDefined(defaultSelections)) {
-                            scope.loadDefaultSelections();
-                        }
-
-                        scope.isSelecting = false;
-                    }
-
-                    // Turn the spinner off
-                    usSpinnerService.stop(scope.usSpinnerKey);
-                },
-
-                handleSearchStringChange: function () {
-
-                    // Reset the offset
-                    scope.updateSearchParams({
-                        offset: 0
-                    });
-
-                    scope.fetch();
-
-                },
-                /**
-                 * Focus the input box
-                 * Do nothing if you click on a existing selection tag
-                 * @param  {event} e click event to tell if we click on existing selection
-                 */
-                focusInputBox: function (e) {
-
-                    var target;
-
-                    if (e) {
-                        target = angular.element(e.target);
-
-                        if (target.hasClass('angular-selector-selection') ||
-                            target.parent().hasClass('angular-selector-selection')) {
-                            return ;
-                        }
-                    }
-
-                    // Typeahead the most used cached data
-                    if (scope.typeahead) {
-                        // TODO use cache to implement typeahead
-                    }
-
-                    $timeout(function () {
-                        inputBox[0].focus();
-                        // Set the isSelected status to false
-                        // prepare for the next selection
-                        scope.isSelected = false;
-                    });
-                },
-
-                blurInputBox: function () {
-
-                    $timeout(function () {
-                        inputBox[0].blur();
-                        // Set the isSelected status to false
-                        // prepare for the next selection
-                        scope.isSelected = false;
-                        scope.handleInputBoxBlur();
-                    });
-
-                },
-
-                handleKeydownResponse: function (e) {
-                    
-                    switch (e.keyCode) {
-
-                        case rcAngularSelectorKeyboardEnum.DOWN_ARROW:
-                            scope.verticalIndex += 1;
-                            scope.refreshDropdownMenu();
-                            break;
-
-                        case rcAngularSelectorKeyboardEnum.UP_ARROW:
-                            scope.verticalIndex -= 1;
-                            scope.refreshDropdownMenu();
-                            break;
-
-                        case rcAngularSelectorKeyboardEnum.LEFT_ARROW:
-                            scope.horizontalIndex -= 1;
-                            break;
-
-                        case rcAngularSelectorKeyboardEnum.RIGHT_ARROW:
-                            scope.horizontalIndex += 1;
-                            break;
-
-                        case rcAngularSelectorKeyboardEnum.ENTER:
-                            scope.selectResult(scope.searchResults[scope.verticalIndex]);
-                            scope.isSelected = false;
-                            break;
-
-                        case rcAngularSelectorKeyboardEnum.ESCAPE:
-                            scope.blurInputBox();
-                            break;
-                    }
-
-                },
-                /**
-                 * Reset the keyboard vertical index record
-                 */
-                resetVerticalIndex: function (indexToReset) {
-
-                    indexToReset = angular.isNumber(indexToReset) ? indexToReset : -1;
-                    scope.verticalIndex = indexToReset;
-                },
-
-                handleMouseoverOnSearchResults: function (searchResultIndex) {
-
-                    scope.resetVerticalIndex(searchResultIndex);
-
-                },
-                /**
-                 * Function called when you press down/up arrow key
-                 * This will adjust the dropdown scroll accordingly
-                 */
-                refreshDropdownMenu: function () {
-
-                    // TODO: Get the height of each 'li' element
-                    // Move the search result panel up or down when necessary
-                    
-                },
-                /**
-                 * Reset the input box
-                 */
-                resetInputBox: function () {
-                    inputBox.val('');
-                },
-                /**
-                 * Reset the search params to default (from user)
-                 * @param  {Boolean} isDeepReset flag to reset everything or just 
-                 *                               offset and search string
-                 */
-                resetSearchParams: function (isDeepReset) {
-
-                    if (isDeepReset) {
-                        scope.updateSearchParams(scope.defaultSearchParams);
-                    } else {
-                        scope.updateSearchParams({
-                            offset: scope.defaultSearchParams.offset,
-                            searchString: scope.defaultSearchParams.searchString
-                        });
-                    }
-
-                },
-                /**
-                 * Reset the offset in search params to 0
-                 */
-                resetOffset: function () {
-                    scope.searchParams.offset = 0;
-                },
-                /**
-                 * Reset the has more flag to true (default)
-                 */
-                resetHasMore: function () {
-                    scope.hasMore = true;
-                },
-                /**
-                 * Update the search params 
-                 */
-                updateSearchParams: function (searchParams) {
-
-                    if (!angular.isObject(searchParams)) {
-                        $log.warn('Invalid search params');
-                        return ;
-                    }
-
-                    angular.extend(scope.searchParams, searchParams);
-                },
-                /**
-                 * Validate the search result
-                 * A valid search result must have an ID and TEXT
-                 */
-                validateSearchResult: function (searchResult) {
-
-                    var validated = angular.isDefined(searchResult.__id) && 
-                        angular.isDefined(searchResult.__text);
-
-                    if (!validated) {
-                        scope.badSearchResults = scope.badSearchResults.concat(
-                            _.remove(scope.searchResults, searchResult));
-                    }
-
-                    return validated;
-
-                }
-
-            });
-
-            // Watcher on searchString updates
-            // Debounce the executing of callback function to reduce ajax calls
-            scope.$watch('searchParams.searchString', _.debounce(function (searchString) {
-
-                if (!angular.isDefined(searchString)) {
-                    return ;
-                }
-
-                scope.handleSearchStringChange();
-
-            }, 300));
-
-            // Watch on the selections array count
-            scope.$watch('selections.length', function (length) {
-
-                // Update the horizontalIndex to be the latest 
-                // index of selection
-                scope.horizontalIndex = length - 1;
-
-            });
-
-            // teardown
-            scope.$on('$destroy', function(){});
-
-        }
-    };
-
-}];
-module.exports.$inject = ["$log", "$http", "$timeout", "rcAngularSelectorAjaxService", "rcAngularSelectorKeyboardEnum", "rcAngularSelectorConfig", "usSpinnerService"];
-},{"lodash":2}],9:[function(require,module,exports){
-/**
- * @fileOverview The selected item filter
- * Return the selection name with a dividor
- *
- * @author rchen
- */
-
-var _ = require('lodash');
-
-// @ngInject
-module.exports = /* @ngInject */ function () {
-
-    return function (selectedItems, keyToShow) {
-
-        if (!angular.isArray(selectedItems)) {
-            return selectedItems;
-        }
-
-        return _.pluck(selectedItems, keyToShow).join(', ');
-
-    };
-
-};
-},{"lodash":2}],10:[function(require,module,exports){
-/**
- * @fileOverview The keyboard code enum
- * @see https://gist.github.com/cjcliffe/1185173
- * 
- * @author rchen
- */
-
-// @ngInject
-
-module.exports = Object.freeze({
-    BACKSPACE: 8,
-    TAB: 9,
-    ENTER: 13,
-    SHIFT: 16,
-    CTRL: 17,
-    ALT: 18,
-    PAUSE: 19,
-    CAPS_LOCK: 20,
-    ESCAPE: 27,
-    SPACE: 32,
-    PAGE_UP: 33,
-    PAGE_DOWN: 34,
-    END: 35,
-    HOME: 36,
-    LEFT_ARROW: 37,
-    UP_ARROW: 38,
-    RIGHT_ARROW: 39,
-    DOWN_ARROW: 40,
-    INSERT: 45,
-    DELETE: 46,
-    KEY_0: 48,
-    KEY_1: 49,
-    KEY_2: 50,
-    KEY_3: 51,
-    KEY_4: 52,
-    KEY_5: 53,
-    KEY_6: 54,
-    KEY_7: 55,
-    KEY_8: 56,
-    KEY_9: 57,
-    KEY_A: 65,
-    KEY_B: 66,
-    KEY_C: 67,
-    KEY_D: 68,
-    KEY_E: 69,
-    KEY_F: 70,
-    KEY_G: 71,
-    KEY_H: 72,
-    KEY_I: 73,
-    KEY_J: 74,
-    KEY_K: 75,
-    KEY_L: 76,
-    KEY_M: 77,
-    KEY_N: 78,
-    KEY_O: 79,
-    KEY_P: 80,
-    KEY_Q: 81,
-    KEY_R: 82,
-    KEY_S: 83,
-    KEY_T: 84,
-    KEY_U: 85,
-    KEY_V: 86,
-    KEY_W: 87,
-    KEY_X: 88,
-    KEY_Y: 89,
-    KEY_Z: 90,
-    LEFT_META: 91,
-    RIGHT_META: 92,
-    SELECT: 93,
-    NUMPAD_0: 96,
-    NUMPAD_1: 97,
-    NUMPAD_2: 98,
-    NUMPAD_3: 99,
-    NUMPAD_4: 100,
-    NUMPAD_5: 101,
-    NUMPAD_6: 102,
-    NUMPAD_7: 103,
-    NUMPAD_8: 104,
-    NUMPAD_9: 105,
-    MULTIPLY: 106,
-    ADD: 107,
-    SUBTRACT: 109,
-    DECIMAL: 110,
-    DIVIDE: 111,
-    F1: 112,
-    F2: 113,
-    F3: 114,
-    F4: 115,
-    F5: 116,
-    F6: 117,
-    F7: 118,
-    F8: 119,
-    F9: 120,
-    F10: 121,
-    F11: 122,
-    F12: 123,
-    NUM_LOCK: 144,
-    SCROLL_LOCK: 145,
-    SEMICOLON: 186,
-    EQUALS: 187,
-    COMMA: 188,
-    DASH: 189,
-    PERIOD: 190,
-    FORWARD_SLASH: 191,
-    GRAVE_ACCENT: 192,
-    OPEN_BRACKET: 219,
-    BACK_SLASH: 220,
-    CLOSE_BRACKET: 221,
-    SINGLE_QUOTE: 222
-});
 },{}]},{},[3]);

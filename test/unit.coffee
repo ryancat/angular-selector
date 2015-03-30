@@ -50,7 +50,7 @@ describe 'Test angular-selector', ->
 		offset: 0
 
 	beforeEach ->
-		inject (_$httpBackend_, 
+		inject (_$httpBackend_,
 			_$log_,
 			_$timeout_,
 			_rcAngularSelectorAjaxService_,
@@ -67,7 +67,7 @@ describe 'Test angular-selector', ->
 			usSpinnerService = _usSpinnerService_
 
 			# The httpBackend mocks
-			$httpBackend 
+			$httpBackend
 				.whenGET /\/jax\/getMarketsBySearchString(\?.*)?/
 				.respond mockSearchResult
 
@@ -77,10 +77,10 @@ describe 'Test angular-selector', ->
 			inject ($compile, $rootScope) ->
 
 				scope = do $rootScope.$new
-				angular.extend scope, 
+				angular.extend scope,
 					searchUrl: '/jax/getMarketsBySearchString'
 					searchParams: mockSearchParams
-					userSession: 
+					userSession:
 						name: 'Ryan'
 						id: '123'
 						homeMarket: '1'
@@ -119,7 +119,7 @@ describe 'Test angular-selector', ->
 			describe '#prepareSelection', ->
 
 				it 'should extend the selection with __id and __text', ->
-					fakeSelection = 
+					fakeSelection =
 						id: '2234'
 						name: '4456'
 					scope.prepareSelection fakeSelection
@@ -131,7 +131,7 @@ describe 'Test angular-selector', ->
 			describe '#loadDefaultSelections', ->
 
 				it 'should load default selections if there is one', ->
-					fakeSelection = 
+					fakeSelection =
 						id: '2234'
 						name: '4456'
 					scope.selections.length = 0
@@ -145,16 +145,16 @@ describe 'Test angular-selector', ->
 			describe '#selectResult', ->
 
 				# it 'should not process when text is missing', ->
-				# 	mockSearchResult_bad = 
+				# 	mockSearchResult_bad =
 				# 		id: '123'
 
 				# 	spyOn $log, 'warn'
 				# 	scope.selectResult mockSearchResult_bad
 				# 	expect $log.warn
 				# 	.toHaveBeenCalledWith('Invalid searchResult')
-						
+
 				it 'should have id and text to process', ->
-					mockSearchResult_good = 
+					mockSearchResult_good =
 						id: '123',
 						text: 'mock'
 
@@ -162,19 +162,19 @@ describe 'Test angular-selector', ->
 					scope.selectResult mockSearchResult_good
 					expect $log.warn
 					.not.toHaveBeenCalledWith('Invalid searchResult')
-								 
+
 				it 'should add selection to selections in data service', ->
 					selections = scope.selections
 					expect selections.length
 					.toBe (do scope.defaultSelections).length
 
-					mockSearchResult_good = 
+					mockSearchResult_good =
 						id: '123',
 						text: 'mock'
 					scope.selectResult mockSearchResult_good
 					expect selections.length
 					.toBe (do scope.defaultSelections).length + 1
-			
+
 			describe '#removeSelection', ->
 
 				it 'should remove the given selection', ->
@@ -201,7 +201,7 @@ describe 'Test angular-selector', ->
 							finally: ->
 					do scope.fetch
 					expect rcAngularSelectorAjaxService.getSearchResult
-					.toHaveBeenCalledWith do scope.searchUrl, scope.searchParams
+					.toHaveBeenCalledWith do scope.searchUrl, scope.updatedSearchParams
 
 				it 'should start the spinner when fetch', ->
 					spyOn usSpinnerService, 'spin'
@@ -268,14 +268,14 @@ describe 'Test angular-selector', ->
 
 				it 'should fetch the correct results by given results key', inject ($compile, $rootScope) ->
 					scope = do $rootScope.$new
-					angular.extend scope, 
+					angular.extend scope,
 						searchUrl: '/jax/getMarketsBySearchString'
 						searchParams: mockSearchParams
-						userSession: 
+						userSession:
 							name: 'Ryan'
 							id: '123'
 							homeMarket: '1'
-						resultKeys: ['markets', 
+						resultKeys: ['markets',
 							id: 'id',
 							text: 'text'
 						]
@@ -297,7 +297,7 @@ describe 'Test angular-selector', ->
 					scope = (do element.scope).$$childHead
 
 					spyOn scope, 'replace'
-					fakeResponse.data = 
+					fakeResponse.data =
 						markets: mockSearchResult
 					fakeResponse.config.params.offset = 0
 					scope.fetchSucceed fakeResponse
@@ -324,9 +324,9 @@ describe 'Test angular-selector', ->
 					.toBe mockSearchResult
 
 				it 'should update the search offset', ->
-					scope.searchParams.offset = 10
+					scope.updatedSearchParams.offset = 10
 					scope.replace mockSearchResult
-					expect scope.searchParams.offset
+					expect scope.updatedSearchParams.offset
 					.toBe mockSearchResult.length
 
 			describe '#append', ->
@@ -341,10 +341,10 @@ describe 'Test angular-selector', ->
 					.toBe mockSearchResult.length + 1
 
 				it 'should update the search offset', ->
-					scope.searchParams.offset = 10
+					scope.updatedSearchParams.offset = 10
 					scope.append mockSearchResult
-					expect scope.searchParams.offset
-					.toBe mockSearchResult.length + 10
+					expect scope.updatedSearchParams.offset
+					.toBe 10 + mockSearchResult.length
 
 			# describe '#deleteSelectionById', ->
 
@@ -363,7 +363,7 @@ describe 'Test angular-selector', ->
 					expect scope.isSelecting
 					.toBe false
 
-					do scope.handleInputBoxFocus 
+					do scope.handleInputBoxFocus
 					expect scope.isSelecting
 					.toBe true
 
@@ -405,14 +405,14 @@ describe 'Test angular-selector', ->
 
 					do scope.handleInputBoxBlur
 					expect scope.loadDefaultSelections
-					.toHaveBeenCalled() 
+					.toHaveBeenCalled()
 
 			describe '#handleSearchStringChange', ->
 
 				it 'should set the offset to 0', ->
-					scope.searchParams.offset = 20
+					scope.updatedSearchParams.offset = 20
 					do scope.handleSearchStringChange
-					expect scope.searchParams.offset 
+					expect scope.updatedSearchParams.offset
 					.toBe 0
 
 				it 'should call fetch to fetch new data', ->
@@ -432,7 +432,7 @@ describe 'Test angular-selector', ->
 
 			describe '#focusInputBox', ->
 
-				mockClickEvent = 
+				mockClickEvent =
 					target: """
 						<li class="angular-selector-selection">
 							<span>abc</span>
@@ -465,15 +465,15 @@ describe 'Test angular-selector', ->
 			describe '#handleKeydownResponse', ->
 
 				it 'should increse verticalIndex by 1 when click down arrow', ->
-					mockKeyEvent = 
+					mockKeyEvent =
 						keyCode: rcAngularSelectorKeyboardEnum.DOWN_ARROW
 					scope.verticalIndex = -1
 					scope.handleKeydownResponse mockKeyEvent
-					expect scope.verticalIndex 
+					expect scope.verticalIndex
 					.toBe 0
 
 				it 'should decrease verticalIndex by 1 when click up arrow', ->
-					mockKeyEvent = 
+					mockKeyEvent =
 						keyCode: rcAngularSelectorKeyboardEnum.UP_ARROW
 					scope.verticalIndex = 0
 					scope.handleKeydownResponse mockKeyEvent
@@ -481,19 +481,19 @@ describe 'Test angular-selector', ->
 					.toBe -1
 
 				it 'should increse horizontalIndex by 1 when click left arrow', ->
-					mockKeyEvent = 
+					mockKeyEvent =
 						keyCode: rcAngularSelectorKeyboardEnum.LEFT_ARROW
 					scope.horizontalIndex = 0
 					scope.handleKeydownResponse mockKeyEvent
-					expect scope.horizontalIndex 
+					expect scope.horizontalIndex
 					.toBe -1
 
 				it 'should decrease horizontalIndex by 1 when click right arrow', ->
-					mockKeyEvent = 
+					mockKeyEvent =
 						keyCode: rcAngularSelectorKeyboardEnum.RIGHT_ARROW
 					scope.horizontalIndex = 0
 					scope.handleKeydownResponse mockKeyEvent
-					expect scope.horizontalIndex 
+					expect scope.horizontalIndex
 					.toBe 1
 
 			describe '#resetVerticalIndex', ->
@@ -526,10 +526,12 @@ describe 'Test angular-selector', ->
 			describe '#resetSearchParams', ->
 
 				it 'should reset the search params to user defaults', ->
-					scope.searchParams = 
+					scope.searchParams = ->
+						offset: mockSearchParams.offset
+					scope.updatedSearchParams =
 						offset: mockSearchParams.offset + 100
 					do scope.resetSearchParams
-					expect scope.searchParams.offset
+					expect scope.updatedSearchParams.offset
 					.toBe mockSearchParams.offset
 
 			describe '#resetHasMore', ->
@@ -543,32 +545,27 @@ describe 'Test angular-selector', ->
 			describe '#updateSearchParams', ->
 
 				it 'should update the searchParams with new offset and limit', ->
-					scope.searchParams = 
-						offset: 20
-						limit: 20
-					scope.updateSearchParams 
+					scope.updateSearchParams
 						offset: 40
-					expect scope.searchParams.offset
+					expect scope.updatedSearchParams.offset
 					.toBe 40
-					expect scope.searchParams.limit
-					.toBe 20
 
 			describe '#validateSearchResult', ->
 
 				it 'should find out if the searchResult has id and text', ->
-					fakeBadSearchResult = 
+					fakeBadSearchResult =
 						id: '123',
 						name: 'john'
 					expect scope.validateSearchResult fakeBadSearchResult
 					.toBe false
 
-					fakeBadSearchResult = 
+					fakeBadSearchResult =
 						_id: '123',
 						text: 'john'
 					expect scope.validateSearchResult fakeBadSearchResult
 					.toBe false
 
-					fakeBadSearchResult = 
+					fakeBadSearchResult =
 						__id: '123',
 						__text: 'john'
 					expect scope.validateSearchResult fakeBadSearchResult

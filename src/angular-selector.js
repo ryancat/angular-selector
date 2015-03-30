@@ -14,14 +14,14 @@ module.exports = angular
 ])
 
 // Constants
-.constant('rcAngularSelectorKeyboardEnum', require('./js/rcKeyBoardEnum'))
-.constant('rcAngularSelectorConfig', require('./js/rcAngularSelectorConfig'))
+.constant('rcAngularSelectorKeyboardEnum', require('./js/constants/rcKeyBoardEnum'))
+.constant('rcAngularSelectorConfig', require('./js/constants/rcAngularSelectorConfig'))
 
 // Filters
-.filter('rcAngularSelectorSelectedItemsFilter', require('./js/rcAngularSelectorSelectedItemsFilter'))
+.filter('rcAngularSelectorSelectedItemsFilter', require('./js/filters/rcAngularSelectorSelectedItemsFilter'))
 
 // Factories
-.factory('RcAngularSelectorDataFactory', require('./js/RcAngularSelectorDataFactory'))
+.factory('RcAngularSelectorDataFactory', require('./js/factories/RcAngularSelectorDataFactory'))
 
 // Services
 .service('rcAngularSelectorAjaxService', require('./js/rcAngularSelectorAjaxService'))
@@ -29,7 +29,7 @@ module.exports = angular
 /**
  * The main entry of turn selector
  * @example
- * 
+ *
  * <div angular-selector
  *        search-url="searchUrl"
  *        search-params="searchParams"
@@ -39,7 +39,7 @@ module.exports = angular
  *
  * @author rchen@turn.com
  */
-.directive('rcAngularSelector', require('./js/rcAngularSelectorDirective'))
+.directive('rcAngularSelector', require('./js/directives/rcAngularSelectorDirective'))
 
 /**
  * The selector input
@@ -48,5 +48,5 @@ module.exports = angular
  *
  * @author rchen@turn.com
  */
-.directive('rcAngularSelectorInput', require('./js/rcAngularSelectorInputDirective'))
+.directive('rcAngularSelectorInput', require('./js/directives/rcAngularSelectorInputDirective'))
 ;

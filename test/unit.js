@@ -159,7 +159,7 @@
               }
             });
             scope.fetch();
-            return expect(rcAngularSelectorAjaxService.getSearchResult).toHaveBeenCalledWith(scope.searchUrl(), scope.searchParams);
+            return expect(rcAngularSelectorAjaxService.getSearchResult).toHaveBeenCalledWith(scope.searchUrl(), scope.updatedSearchParams);
           });
           it('should start the spinner when fetch', function() {
             spyOn(usSpinnerService, 'spin');
@@ -266,9 +266,9 @@
             return expect(scope.searchResults).toBe(mockSearchResult);
           });
           return it('should update the search offset', function() {
-            scope.searchParams.offset = 10;
+            scope.updatedSearchParams.offset = 10;
             scope.replace(mockSearchResult);
-            return expect(scope.searchParams.offset).toBe(mockSearchResult.length);
+            return expect(scope.updatedSearchParams.offset).toBe(mockSearchResult.length);
           });
         });
         describe('#append', function() {
@@ -283,9 +283,9 @@
             return expect(scope.searchResults.length).toBe(mockSearchResult.length + 1);
           });
           return it('should update the search offset', function() {
-            scope.searchParams.offset = 10;
+            scope.updatedSearchParams.offset = 10;
             scope.append(mockSearchResult);
-            return expect(scope.searchParams.offset).toBe(mockSearchResult.length + 10);
+            return expect(scope.updatedSearchParams.offset).toBe(10 + mockSearchResult.length);
           });
         });
         describe('#handleInputBoxFocus', function() {
@@ -330,9 +330,9 @@
         });
         describe('#handleSearchStringChange', function() {
           it('should set the offset to 0', function() {
-            scope.searchParams.offset = 20;
+            scope.updatedSearchParams.offset = 20;
             scope.handleSearchStringChange();
-            return expect(scope.searchParams.offset).toBe(0);
+            return expect(scope.updatedSearchParams.offset).toBe(0);
           });
           return it('should call fetch to fetch new data', function() {
             spyOn(scope, 'fetch');
@@ -439,11 +439,16 @@
         });
         describe('#resetSearchParams', function() {
           return it('should reset the search params to user defaults', function() {
-            scope.searchParams = {
+            scope.searchParams = function() {
+              return {
+                offset: mockSearchParams.offset
+              };
+            };
+            scope.updatedSearchParams = {
               offset: mockSearchParams.offset + 100
             };
             scope.resetSearchParams();
-            return expect(scope.searchParams.offset).toBe(mockSearchParams.offset);
+            return expect(scope.updatedSearchParams.offset).toBe(mockSearchParams.offset);
           });
         });
         describe('#resetHasMore', function() {
@@ -455,15 +460,10 @@
         });
         describe('#updateSearchParams', function() {
           return it('should update the searchParams with new offset and limit', function() {
-            scope.searchParams = {
-              offset: 20,
-              limit: 20
-            };
             scope.updateSearchParams({
               offset: 40
             });
-            expect(scope.searchParams.offset).toBe(40);
-            return expect(scope.searchParams.limit).toBe(20);
+            return expect(scope.updatedSearchParams.offset).toBe(40);
           });
         });
         describe('#validateSearchResult', function() {

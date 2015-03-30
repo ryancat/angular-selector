@@ -2,6 +2,7 @@ angular-selector
 =============
 
 ### dependencies
+angular ~1.2
 
 ### usage
 
@@ -27,7 +28,7 @@ angular-selector
 angular
 .module('foo', ['rc/angularSelector'])
 .controller('fooCtrl', function ($scope) {
-	
+
 	// ...
 
 });

@@ -10,9 +10,6 @@
   "private": true,
   "dependencies": {
     "angular": "1.2.23",
-    "unicorn": "ssh://git@stash.turn.com:7999/cnsl/unicorn.git#~0",
-    "turn-icon-font": "ssh://git@stash.turn.com:7999/cnsl/turn-icon-font.git",
-    "infinite-scroll-container": "ssh://git@stash.turn.com:7999/~rchen/turn-infinite-scroll.git",
     "angular-spinner": "https://github.com/turn/angular-spinner.git"
   },
   "devDependencies": {

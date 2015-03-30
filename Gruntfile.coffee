@@ -53,7 +53,7 @@ module.exports = (grunt) ->
 					src: 'turn-icon-font*'
 					dest: 'static/turn-icon-font/'
 				}]
-					
+
 		coveralls:
 			options:
 				force: true
@@ -88,8 +88,8 @@ module.exports = (grunt) ->
 				src: ['./dist/angular-selector.js']
 				dest: './dist/angular-selector.js'
 
-		autoprefixer: 
-			options: 
+		autoprefixer:
+			options:
 				browsers: [
 					'Explorer >= 9',
 					'last 5 Chrome versions'
@@ -152,7 +152,7 @@ module.exports = (grunt) ->
 				options:
 					interrupt: true
 					spawn: false
-		
+
 		express:
 			dev:
 				options:
