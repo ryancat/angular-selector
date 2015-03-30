@@ -80,13 +80,16 @@ describe 'Test angular-selector', ->
 				angular.extend scope,
 					searchUrl: '/jax/getMarketsBySearchString'
 					searchParams: mockSearchParams
+					selectOptions: (mockSearchResult.slice 0, 4).map (result) ->
+						id: result.id
+						text: result.name
 					userSession:
 						name: 'Ryan'
 						id: '123'
 						homeMarket: '1'
 					selections: []
 					defaultSelections: mockSearchResult.slice 0, 2
-					resultKeys: [{
+					resultMap: [{
 						id: 'id',
 						text: 'name'
 						}]
@@ -96,12 +99,10 @@ describe 'Test angular-selector', ->
 					selections="selections"
 					search-url="searchUrl"
 					search-params="searchParams"
-					session="userSession"
+					select-options="selectOptions"
 					multiple="true"
-					typeahead="true"
-					tolerance="5"
 					default-selections="defaultSelections"
-					result-keys="resultKeys"></rc-angular-selector>
+					result-map="resultMap"></rc-angular-selector>
 				"""
 
 				($compile element) scope
@@ -144,15 +145,6 @@ describe 'Test angular-selector', ->
 
 			describe '#selectResult', ->
 
-				# it 'should not process when text is missing', ->
-				# 	mockSearchResult_bad =
-				# 		id: '123'
-
-				# 	spyOn $log, 'warn'
-				# 	scope.selectResult mockSearchResult_bad
-				# 	expect $log.warn
-				# 	.toHaveBeenCalledWith('Invalid searchResult')
-
 				it 'should have id and text to process', ->
 					mockSearchResult_good =
 						id: '123',
@@ -194,7 +186,7 @@ describe 'Test angular-selector', ->
 
 			describe '#fetch', ->
 
-				it 'should call #getSearchResult with url and params', ->
+				it 'should call #getSearchResult with url and params, if url is given', ->
 					spyOn rcAngularSelectorAjaxService, 'getSearchResult'
 					.and.returnValue
 						then: ->
@@ -202,6 +194,17 @@ describe 'Test angular-selector', ->
 					do scope.fetch
 					expect rcAngularSelectorAjaxService.getSearchResult
 					.toHaveBeenCalledWith do scope.searchUrl, scope.updatedSearchParams
+
+				it 'should use the given selectOptions, if url is not given', ->
+					scope.searchUrl = ->
+					spyOn rcAngularSelectorAjaxService, 'getSearchResult'
+					spyOn scope, 'fetchSucceed'
+					do scope.fetch
+					expect rcAngularSelectorAjaxService.getSearchResult
+					.not.toHaveBeenCalled()
+					scope.$apply()
+					expect scope.fetchSucceed
+					.toHaveBeenCalled()
 
 				it 'should start the spinner when fetch', ->
 					spyOn usSpinnerService, 'spin'
@@ -275,7 +278,7 @@ describe 'Test angular-selector', ->
 							name: 'Ryan'
 							id: '123'
 							homeMarket: '1'
-						resultKeys: ['markets',
+						resultMap: ['markets',
 							id: 'id',
 							text: 'text'
 						]
@@ -284,7 +287,7 @@ describe 'Test angular-selector', ->
 					<rc-angular-selector
 						selections="selections"
 						search-url="searchUrl"
-						result-keys="resultKeys"
+						result-map="resultMap"
 						search-params="searchParams"
 						session="userSession"
 						multiple="true"

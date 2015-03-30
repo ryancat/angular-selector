@@ -22,7 +22,8 @@ module.exports = /* @ngInject */ function (
             searchUrl: '&',
             searchParams: '&',
             isDisabled: '&',
-            resultKeys: '&',
+            resultMap: '&',
+            selectOptions: '&',
             multiple: '&',
             prefixSearchResults: '&',
             usSpinnerOptions: '&',
@@ -54,8 +55,8 @@ module.exports = /* @ngInject */ function (
 	                return ;
 	            }
 
-	            if (!angular.isArray(scope.resultKeys())) {
-	                scope.resultKeys = function () {
+	            if (!angular.isArray(scope.resultMap())) {
+	                scope.resultMap = function () {
 	                    return [{
 	                        id: 'id',
 	                        text: 'text'
@@ -118,8 +119,8 @@ module.exports = /* @ngInject */ function (
 
 	                    angular.extend(selection, {
 
-	                        __id: selection[_.last(scope.resultKeys()).id] || selection.id,
-	                        __text: selection[_.last(scope.resultKeys()).text] || selection.text,
+	                        __id: selection[_.last(scope.resultMap()).id] || selection.id,
+	                        __text: selection[_.last(scope.resultMap()).text] || selection.text,
 
 	                    });
 

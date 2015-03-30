@@ -7116,7 +7116,8 @@ module.exports = /* @ngInject */ ["$log", "$document", "$timeout", "RcAngularSel
             searchUrl: '&',
             searchParams: '&',
             isDisabled: '&',
-            resultKeys: '&',
+            resultMap: '&',
+            selectOptions: '&',
             multiple: '&',
             prefixSearchResults: '&',
             usSpinnerOptions: '&',
@@ -7148,8 +7149,8 @@ module.exports = /* @ngInject */ ["$log", "$document", "$timeout", "RcAngularSel
 	                return ;
 	            }
 
-	            if (!angular.isArray(scope.resultKeys())) {
-	                scope.resultKeys = function () {
+	            if (!angular.isArray(scope.resultMap())) {
+	                scope.resultMap = function () {
 	                    return [{
 	                        id: 'id',
 	                        text: 'text'
@@ -7212,8 +7213,8 @@ module.exports = /* @ngInject */ ["$log", "$document", "$timeout", "RcAngularSel
 
 	                    angular.extend(selection, {
 
-	                        __id: selection[_.last(scope.resultKeys()).id] || selection.id,
-	                        __text: selection[_.last(scope.resultKeys()).text] || selection.text,
+	                        __id: selection[_.last(scope.resultMap()).id] || selection.id,
+	                        __text: selection[_.last(scope.resultMap()).text] || selection.text,
 
 	                    });
 
@@ -7265,11 +7266,12 @@ module.exports.$inject = ["$log", "$document", "$timeout", "RcAngularSelectorDat
 var _ = require('lodash');
 
 // @ngInject
-module.exports = /* @ngInject */ ["$log", "$http", "$q", "$timeout", "rcAngularSelectorAjaxService", "rcAngularSelectorKeyboardEnum", "rcAngularSelectorConfig", "usSpinnerService", function (
+module.exports = /* @ngInject */ ["$log", "$http", "$q", "$timeout", "$filter", "rcAngularSelectorAjaxService", "rcAngularSelectorKeyboardEnum", "rcAngularSelectorConfig", "usSpinnerService", function (
     $log,
     $http,
     $q,
     $timeout,
+    $filter,
     rcAngularSelectorAjaxService,
     rcAngularSelectorKeyboardEnum,
     rcAngularSelectorConfig,
@@ -7353,15 +7355,22 @@ module.exports = /* @ngInject */ ["$log", "$http", "$q", "$timeout", "rcAngularS
                  */
                 fetch: function () {
 
-                	var deferred = $q.defer();
+                	var deferred = $q.defer(),
+                		selectOptions = scope.selectOptions();
+
+                	// Get the select options if given
+                	selectOptions = angular.isArray(selectOptions) ? selectOptions : [];
                     // Turn the spinner on
                     usSpinnerService.spin(scope.usSpinnerKey);
 
                     // If there is no search url defined
                     // use options given by user
                     if (!scope.searchUrl()) {
-                    	deferred.resolve([]);
-                    } else {
+                    	deferred.resolve($filter('filter')(selectOptions, scope.updatedSearchParams.searchString));
+                    }
+                    // Otherwise, we should use the url to fetch
+                    // data from remote side
+                    else {
                     	deferred.resolve(rcAngularSelectorAjaxService.getSearchResult(
 	                        scope.searchUrl(),
 	                        // We need to copy the search params as the cache is using reference
@@ -7395,8 +7404,8 @@ module.exports = /* @ngInject */ ["$log", "$http", "$q", "$timeout", "rcAngularS
                         results = response.data;
                     }
 
-                    // Get the correct list of data through given resultKeys array
-                    (scope.resultKeys() || []).forEach(function (resultKey) {
+                    // Get the correct list of data through given resultMap array
+                    (scope.resultMap() || []).forEach(function (resultKey) {
 
                          if (angular.isString(resultKey)) {
                             results = results[resultKey];
@@ -7686,7 +7695,7 @@ module.exports = /* @ngInject */ ["$log", "$http", "$q", "$timeout", "rcAngularS
 
             // Watcher on searchString updates
             // Debounce the executing of callback function to reduce ajax calls
-            scope.$watch('searchParams.searchString', _.debounce(function (searchString) {
+            scope.$watch('updatedSearchParams.searchString', _.debounce(function (searchString) {
 
                 if (!angular.isDefined(searchString)) {
                     return ;
@@ -7712,7 +7721,7 @@ module.exports = /* @ngInject */ ["$log", "$http", "$q", "$timeout", "rcAngularS
     };
 
 }];
-module.exports.$inject = ["$log", "$http", "$q", "$timeout", "rcAngularSelectorAjaxService", "rcAngularSelectorKeyboardEnum", "rcAngularSelectorConfig", "usSpinnerService"];
+module.exports.$inject = ["$log", "$http", "$q", "$timeout", "$filter", "rcAngularSelectorAjaxService", "rcAngularSelectorKeyboardEnum", "rcAngularSelectorConfig", "usSpinnerService"];
 
 },{"lodash":2}],8:[function(require,module,exports){
 /**

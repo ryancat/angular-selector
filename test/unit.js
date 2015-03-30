@@ -61,6 +61,12 @@
           angular.extend(scope, {
             searchUrl: '/jax/getMarketsBySearchString',
             searchParams: mockSearchParams,
+            selectOptions: (mockSearchResult.slice(0, 4)).map(function(result) {
+              return {
+                id: result.id,
+                text: result.name
+              };
+            }),
             userSession: {
               name: 'Ryan',
               id: '123',
@@ -68,14 +74,14 @@
             },
             selections: [],
             defaultSelections: mockSearchResult.slice(0, 2),
-            resultKeys: [
+            resultMap: [
               {
                 id: 'id',
                 text: 'name'
               }
             ]
           });
-          element = angular.element("<rc-angular-selector\n	selections=\"selections\"\n	search-url=\"searchUrl\"\n	search-params=\"searchParams\"\n	session=\"userSession\"\n	multiple=\"true\"\n	typeahead=\"true\"\n	tolerance=\"5\"\n	default-selections=\"defaultSelections\"\n	result-keys=\"resultKeys\"></rc-angular-selector>");
+          element = angular.element("<rc-angular-selector\n	selections=\"selections\"\n	search-url=\"searchUrl\"\n	search-params=\"searchParams\"\n	select-options=\"selectOptions\"\n	multiple=\"true\"\n	default-selections=\"defaultSelections\"\n	result-map=\"resultMap\"></rc-angular-selector>");
           ($compile(element))(scope);
           scope.$apply();
           return scope = (element.scope()).$$childHead;
@@ -150,7 +156,7 @@
           });
         });
         describe('#fetch', function() {
-          it('should call #getSearchResult with url and params', function() {
+          it('should call #getSearchResult with url and params, if url is given', function() {
             spyOn(rcAngularSelectorAjaxService, 'getSearchResult').and.returnValue({
               then: function() {
                 return {
@@ -160,6 +166,15 @@
             });
             scope.fetch();
             return expect(rcAngularSelectorAjaxService.getSearchResult).toHaveBeenCalledWith(scope.searchUrl(), scope.updatedSearchParams);
+          });
+          it('should use the given selectOptions, if url is not given', function() {
+            scope.searchUrl = function() {};
+            spyOn(rcAngularSelectorAjaxService, 'getSearchResult');
+            spyOn(scope, 'fetchSucceed');
+            scope.fetch();
+            expect(rcAngularSelectorAjaxService.getSearchResult).not.toHaveBeenCalled();
+            scope.$apply();
+            return expect(scope.fetchSucceed).toHaveBeenCalled();
           });
           it('should start the spinner when fetch', function() {
             spyOn(usSpinnerService, 'spin');
@@ -227,14 +242,14 @@
                 id: '123',
                 homeMarket: '1'
               },
-              resultKeys: [
+              resultMap: [
                 'markets', {
                   id: 'id',
                   text: 'text'
                 }
               ]
             });
-            element = angular.element("<rc-angular-selector\n	selections=\"selections\"\n	search-url=\"searchUrl\"\n	result-keys=\"resultKeys\"\n	search-params=\"searchParams\"\n	session=\"userSession\"\n	multiple=\"true\"\n	typeahead=\"true\"\n	tolerance=\"5\"></rc-angular-selector>");
+            element = angular.element("<rc-angular-selector\n	selections=\"selections\"\n	search-url=\"searchUrl\"\n	result-map=\"resultMap\"\n	search-params=\"searchParams\"\n	session=\"userSession\"\n	multiple=\"true\"\n	typeahead=\"true\"\n	tolerance=\"5\"></rc-angular-selector>");
             ($compile(element))(scope);
             scope.$apply();
             scope = (element.scope()).$$childHead;

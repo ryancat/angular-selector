@@ -12,6 +12,7 @@ module.exports = /* @ngInject */ function (
     $http,
     $q,
     $timeout,
+    $filter,
     rcAngularSelectorAjaxService,
     rcAngularSelectorKeyboardEnum,
     rcAngularSelectorConfig,
@@ -95,15 +96,22 @@ module.exports = /* @ngInject */ function (
                  */
                 fetch: function () {
 
-                	var deferred = $q.defer();
+                	var deferred = $q.defer(),
+                		selectOptions = scope.selectOptions();
+
+                	// Get the select options if given
+                	selectOptions = angular.isArray(selectOptions) ? selectOptions : [];
                     // Turn the spinner on
                     usSpinnerService.spin(scope.usSpinnerKey);
 
                     // If there is no search url defined
                     // use options given by user
                     if (!scope.searchUrl()) {
-                    	deferred.resolve([]);
-                    } else {
+                    	deferred.resolve($filter('filter')(selectOptions, scope.updatedSearchParams.searchString));
+                    }
+                    // Otherwise, we should use the url to fetch
+                    // data from remote side
+                    else {
                     	deferred.resolve(rcAngularSelectorAjaxService.getSearchResult(
 	                        scope.searchUrl(),
 	                        // We need to copy the search params as the cache is using reference
@@ -137,8 +145,8 @@ module.exports = /* @ngInject */ function (
                         results = response.data;
                     }
 
-                    // Get the correct list of data through given resultKeys array
-                    (scope.resultKeys() || []).forEach(function (resultKey) {
+                    // Get the correct list of data through given resultMap array
+                    (scope.resultMap() || []).forEach(function (resultKey) {
 
                          if (angular.isString(resultKey)) {
                             results = results[resultKey];
@@ -428,7 +436,7 @@ module.exports = /* @ngInject */ function (
 
             // Watcher on searchString updates
             // Debounce the executing of callback function to reduce ajax calls
-            scope.$watch('searchParams.searchString', _.debounce(function (searchString) {
+            scope.$watch('updatedSearchParams.searchString', _.debounce(function (searchString) {
 
                 if (!angular.isDefined(searchString)) {
                     return ;
